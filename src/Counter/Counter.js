@@ -91,97 +91,111 @@ const { Option } = Select
 
 function Counter(){
     //state
-    const [state, setState] = useImmer({
-        task: {
+    const [task, setTask] = useImmer({
             id: Number(Math.random().toString().substr(3,6) + Date.now()).toString(36),
             name: "",
             price: "",
             currency: null,
-            complete: false
-        },
-        rate: {
+            complete: false,
+            RMB: 0,
             RUB: 0,
             USD: 0
-        },
-        list: [],
     });
+    const [rate, setRate] = useImmer({
+            RUB: 0,
+            USD: 0
+    });
+    const [list, setList] = useImmer([]);
 
     //method
+
+    async function inList(){
+        await setList( draft => {
+            draft.push(task);
+        });
+    }
+
+    function setTaskNull(){
+         setTask( draft => {
+            draft.id = Number(Math.random().toString().substr(3,6) + Date.now()).toString(36);
+            draft.currency = '';
+            draft.price = '';
+            draft.name = '';
+        });
+    }
+
     const add = () => {
         //form-check
-        if (!state.task.name){
-            alert("You need to fill name to input-box!")
+        if (!task.name){
+            alert("You need to fill name to input-box!");
             return
-        };
-        if (!state.task.price){
-            alert("You need to fill price to input-box!")
+        }
+        if (!task.price){
+            alert("You need to fill price to input-box!");
             return
-        };
-        if (!state.task.currency){
-            alert("You need to choose currency to select-box!")
+        }
+        if (!task.currency){
+            alert("You need to choose currency to select-box!");
             return 
-        };
+        }
         //state manager
-        setState( draft => {
-            switch (state.task.currency) {
+        setTask( draft => {
+            switch (task.currency) {
                 case 'RUB':
-                    draft.task.RUB = Number(state.task.price).toFixed(5);
-                    draft.task.RMB = (draft.task.RUB / draft.rate.RUB).toFixed(5);
-                    draft.task.USD = (draft.task.RMB * draft.rate.USD).toFixed(5);
+                    draft.RUB = Number(task.price).toFixed(5);
+                    draft.RMB = (draft.RUB / rate.RUB).toFixed(5);
+                    draft.USD = (draft.RMB * rate.USD).toFixed(5);
                     break;
 
                 case 'RMB':
-                    draft.task.RMB = Number(state.task.price).toFixed(5);
-                    draft.task.RUB = (draft.task.RMB * draft.rate.RUB).toFixed(5);
-                    draft.task.USD = (draft.task.RMB * draft.rate.USD).toFixed(5);
+                    draft.RMB = Number(task.price).toFixed(5);
+                    draft.RUB = (draft.RMB * rate.RUB).toFixed(5);
+                    draft.USD = (draft.RMB * rate.USD).toFixed(5);
                     break;
 
                 case 'USD':
-                    draft.task.USD = Number(state.task.price).toFixed(5);
-                    draft.task.RMB = (draft.task.USD / draft.rate.USD).toFixed(5);
-                    draft.task.RUB = (draft.task.RMB * draft.rate.RUB).toFixed(5);
+                    draft.USD = Number(task.price).toFixed(5);
+                    draft.RMB = (draft.USD / rate.USD).toFixed(5);
+                    draft.RUB = (draft.RMB * rate.RUB).toFixed(5);
                     break;
 
                 default:
-                    draft.task.RMB = 0;
-                    draft.task.RUB = 0;
-                    draft.task.USD = 0;
-            };
-            draft.list.push(draft.task);
+                    draft.RMB = 0;
+                    draft.RUB = 0;
+                    draft.USD = 0;
+            }
         })
-        setState( draft => {
-            draft.task.id = Number(Math.random().toString().substr(3,6) + Date.now()).toString(36);
-            draft.task.name = "";
-            draft.task.price = "";
-            draft.task.currency = null;
-            draft.task.complete = false;
-        });
     }
 
     //select change
     function selectHandleChange(value) {
-        setState( draft => {
-            draft.task["currency"] = value
+        setTask( draft => {
+            draft["currency"] = value
         });
     }
 
     //checkbox onChange
     function onChange(e) {
-        setState( draft => {
-            if ( state.list.find( item => item.id === e.target.value ).complete ){
-                    draft.list.find( item => item.id === e.target.value ).complete = false;
-            } else {
-                    draft.list.find( item => item.id === e.target.value ).complete = true;
-            }
+        setList( draft => {
+                    var index = draft.findIndex( item => item.id === e.target.value );
+                    draft[index].complete = !draft[index].complete;
         });
     }
 
     //input change
     const inputHandleChange = ( input ) => {
-        setState( draft => {
-            draft.task[input.target.name] = input.target.value;
+        setTask( draft => {
+            draft[input.target.name] = input.target.value;
         });
     };
+
+    useEffect( () => {
+        if (task.USD && task.RMB && task.RUB){
+            inList().then( () => {
+                setTaskNull();
+            })
+        }
+    },[task.USD,task.RMB,task.RUB])
 
     //http
     useEffect(() => {
@@ -189,9 +203,9 @@ function Counter(){
             await axios(
                 `https://api.globus.furniture/forex`
             ).then( (result) => {
-                    setState( draft => {
-                        draft.rate.RUB = result.data.RUB.value;
-                        draft.rate.USD = result.data.USD.value;
+                    setRate( draft => {
+                        draft.RUB = result.data.RUB.value;
+                        draft.USD = result.data.USD.value;
                     });
                 }
             );
@@ -203,9 +217,9 @@ function Counter(){
     return (
         <>
             <Header>
-                <MyInput placeholder="task" name="name" value={ state.task.name } onChange={ inputHandleChange }></MyInput>
-                <MyInput placeholder="price" name="price" value={ state.task.price } onChange={ inputHandleChange }></MyInput>
-                <MySelect placeholder="currency" style={{ width: 240 }} value={ state.task.currency } onChange={ selectHandleChange }>
+                <MyInput placeholder="task" name="name" value={ task.name } onChange={ inputHandleChange }></MyInput>
+                <MyInput placeholder="price" name="price" value={ task.price } onChange={ inputHandleChange }></MyInput>
+                <MySelect placeholder="currency" style={{ width: 240 }} value={ task.currency } onChange={ selectHandleChange }>
                     <Option value="RMB">RMB</Option>
                     <Option value="RUB">RUB</Option>
                     <Option value="USD">USD</Option>
@@ -215,15 +229,15 @@ function Counter(){
             <Paragraph>
                 <div>Exchange rate：</div>
                 <div>
-                    <Text>{ (state.rate.RUB/1).toFixed(5) }₽/￥</Text>
-                    <Text>{ (state.rate.RUB/state.rate.USD).toFixed(5) }₽/$</Text>
-                    <Text>{ (1/state.rate.USD).toFixed(5) }￥/$</Text>
+                    <Text>{ (rate.RUB).toFixed(5) }₽/￥</Text>
+                    <Text>{ (rate.RUB/rate.USD).toFixed(5) }₽/$</Text>
+                    <Text>{ (1/rate.USD).toFixed(5) }￥/$</Text>
                 </div>
             </Paragraph>
             <Title>Plan：</Title>
             <MyList
                     bordered
-                    dataSource={ state.list.filter( item => item.complete === false ) }
+                    dataSource={ list.filter( item => item.complete === false ) }
                     renderItem={ item => (
                         <List.Item
                             key={ item.id }
@@ -244,13 +258,13 @@ function Counter(){
             <Paragraph>
                 <div>Will cost：</div>
                 <div>
-                    <Text>{ state.list.filter( item => item.complete === false ).reduce((prev, item) => {
+                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
                         return (parseFloat(prev) + parseFloat(item.RUB)).toFixed(5)
                     }, 0) }₽</Text>
-                    <Text>{ state.list.filter( item => item.complete === false ).reduce((prev, item) => {
+                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
                         return (parseFloat(prev) + parseFloat(item.RMB)).toFixed(5)
                     }, 0) }￥</Text>
-                    <Text>{ state.list.filter( item => item.complete === false ).reduce((prev, item) => {
+                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
                         return (parseFloat(prev) + parseFloat(item.USD)).toFixed(5)
                     }, 0) }$</Text>
                 </div>
@@ -258,7 +272,7 @@ function Counter(){
             <Title>Complete：</Title>
             <MyList
                     bordered
-                    dataSource={ state.list.filter( item => item.complete === true ) }
+                    dataSource={ list.filter( item => item.complete === true ) }
                     renderItem={ item => (
                         <List.Item
                             key={ item.id }
@@ -279,13 +293,13 @@ function Counter(){
             <Paragraph>
                 <div>total：</div>
                 <div>
-                    <Text>{ state.list.filter( item => item.complete === true ).reduce((prev, item) => {
+                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
                         return (parseFloat(prev) + parseFloat(item.RUB)).toFixed(5)
                     }, 0) }₽</Text>
-                    <Text>{ state.list.filter( item => item.complete === true ).reduce((prev, item) => {
+                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
                         return (parseFloat(prev) + parseFloat(item.RMB)).toFixed(5)
                     }, 0) }￥</Text>
-                    <Text>{ state.list.filter( item => item.complete === true ).reduce((prev, item) => {
+                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
                         return (parseFloat(prev) + parseFloat(item.USD)).toFixed(5)
                     }, 0) }$</Text>
                 </div>
