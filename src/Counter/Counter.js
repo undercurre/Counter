@@ -108,22 +108,6 @@ function Counter(){
     const [list, setList] = useImmer([]);
 
     //method
-
-    async function inList(){
-        await setList( draft => {
-            draft.push(task);
-        });
-    }
-
-    function setTaskNull(){
-         setTask( draft => {
-            draft.id = Number(Math.random().toString().substr(3,6) + Date.now()).toString(36);
-            draft.currency = '';
-            draft.price = '';
-            draft.name = '';
-        });
-    }
-
     const add = () => {
         //form-check
         if (!task.name){
@@ -191,11 +175,17 @@ function Counter(){
 
     useEffect( () => {
         if (task.USD && task.RMB && task.RUB){
-            inList().then( () => {
-                setTaskNull();
-            })
+                setList( draft => {
+                    draft.push(task);
+                });
+                setTask( draft => {
+                    draft.id = Number(Math.random().toString().substr(3,6) + Date.now()).toString(36);
+                    draft.currency = '';
+                    draft.price = '';
+                    draft.name = '';
+                });
         }
-    },[task.USD,task.RMB,task.RUB])
+    },[task.USD,task.RMB,task.RUB,setTask,setList])
 
     //http
     useEffect(() => {
@@ -211,7 +201,7 @@ function Counter(){
             );
         };
         fetchData()
-    }, []);
+    }, [setRate]);
 
     //render
     return (
@@ -258,15 +248,15 @@ function Counter(){
             <Paragraph>
                 <div>Will cost：</div>
                 <div>
-                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
-                        return (parseFloat(prev) + parseFloat(item.RUB)).toFixed(5)
-                    }, 0) }₽</Text>
-                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
-                        return (parseFloat(prev) + parseFloat(item.RMB)).toFixed(5)
-                    }, 0) }￥</Text>
-                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
-                        return (parseFloat(prev) + parseFloat(item.USD)).toFixed(5)
-                    }, 0) }$</Text>
+                    <Text>{ list.filter( item => item.complete === false ).map( item => { return parseFloat(item.RUB) }).reduce((prev, item) => {
+                        return prev + item
+                    }, 0).toFixed(5) }$</Text>
+                    <Text>{ list.filter( item => item.complete === false ).map( item => { return parseFloat(item.RMB) }).reduce((prev, item) => {
+                        return prev + item
+                    }, 0).toFixed(5) }$</Text>
+                    <Text>{ list.filter( item => item.complete === false ).map( item => { return parseFloat(item.USD) }).reduce((prev, item) => {
+                        return prev + item
+                    }, 0).toFixed(5) }$</Text>
                 </div>
             </Paragraph>
             <Title>Complete：</Title>
@@ -293,15 +283,15 @@ function Counter(){
             <Paragraph>
                 <div>total：</div>
                 <div>
-                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
-                        return (parseFloat(prev) + parseFloat(item.RUB)).toFixed(5)
-                    }, 0) }₽</Text>
-                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
-                        return (parseFloat(prev) + parseFloat(item.RMB)).toFixed(5)
-                    }, 0) }￥</Text>
-                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
-                        return (parseFloat(prev) + parseFloat(item.USD)).toFixed(5)
-                    }, 0) }$</Text>
+                    <Text>{ list.filter( item => item.complete === true ).map( item => { return parseFloat(item.RUB) }).reduce((prev, item) => {
+                        return prev + item
+                    }, 0).toFixed(5) }$</Text>
+                    <Text>{ list.filter( item => item.complete === true ).map( item => { return parseFloat(item.RMB) }).reduce((prev, item) => {
+                        return prev + item
+                    }, 0).toFixed(5) }$</Text>
+                    <Text>{ list.filter( item => item.complete === true ).map( item => { return parseFloat(item.USD) }).reduce((prev, item) => {
+                        return prev + item
+                    }, 0).toFixed(5) }$</Text>
                 </div>
             </Paragraph>
         </>
