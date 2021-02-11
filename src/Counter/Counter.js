@@ -27,6 +27,7 @@ const Paragraph = styled.div`
     display: flex;
     justify-content: space-between;
     padding: 10px;
+    padding-right: 12px;
 `
 
 const Title = styled.div`
@@ -40,8 +41,8 @@ const ListParagraph = styled(Paragraph)`
 
 const Text = styled.span`
     display: inline-block;
-    width: 132px;
-    padding: 0 24px;
+    width: 140px;
+    padding: 0 20px;
     box-sizing: border-box;
     text-align: center;
 `
@@ -91,11 +92,14 @@ const { Option } = Select
 
 function Counter(){
     //state
+    const [form, setForm] = useImmer({
+       name: "",
+       price: "",
+       currency: null,
+    });
     const [task, setTask] = useImmer({
             id: Number(Math.random().toString().substr(3,6) + Date.now()).toString(36),
             name: "",
-            price: "",
-            currency: null,
             complete: false,
             RMB: 0,
             RUB: 0,
@@ -110,35 +114,36 @@ function Counter(){
     //method
     const add = () => {
         //form-check
-        if (!task.name){
+        if (!form.name){
             alert("You need to fill name to input-box!");
             return
         }
-        if (!task.price){
+        if (!form.price){
             alert("You need to fill price to input-box!");
             return
         }
-        if (!task.currency){
+        if (!form.currency){
             alert("You need to choose currency to select-box!");
             return 
         }
         //state manager
         setTask( draft => {
-            switch (task.currency) {
+            draft.name = form.name
+            switch (form.currency) {
                 case 'RUB':
-                    draft.RUB = Number(task.price).toFixed(5);
+                    draft.RUB = Number(form.price).toFixed(5);
                     draft.RMB = (draft.RUB / rate.RUB).toFixed(5);
                     draft.USD = (draft.RMB * rate.USD).toFixed(5);
                     break;
 
                 case 'RMB':
-                    draft.RMB = Number(task.price).toFixed(5);
+                    draft.RMB = Number(form.price).toFixed(5);
                     draft.RUB = (draft.RMB * rate.RUB).toFixed(5);
                     draft.USD = (draft.RMB * rate.USD).toFixed(5);
                     break;
 
                 case 'USD':
-                    draft.USD = Number(task.price).toFixed(5);
+                    draft.USD = Number(form.price).toFixed(5);
                     draft.RMB = (draft.USD / rate.USD).toFixed(5);
                     draft.RUB = (draft.RMB * rate.RUB).toFixed(5);
                     break;
@@ -153,7 +158,7 @@ function Counter(){
 
     //select change
     function selectHandleChange(value) {
-        setTask( draft => {
+        setForm( draft => {
             draft["currency"] = value
         });
     }
@@ -168,7 +173,7 @@ function Counter(){
 
     //input change
     const inputHandleChange = ( input ) => {
-        setTask( draft => {
+        setForm( draft => {
             draft[input.target.name] = input.target.value;
         });
     };
@@ -180,12 +185,14 @@ function Counter(){
                 });
                 setTask( draft => {
                     draft.id = Number(Math.random().toString().substr(3,6) + Date.now()).toString(36);
-                    draft.currency = '';
-                    draft.price = '';
-                    draft.name = '';
                 });
+                setForm( draft => {
+                    draft.name = '';
+                    draft.price = '';
+                    draft.currency = null;
+                })
         }
-    },[task.USD,task.RMB,task.RUB,setTask,setList])
+    },[task.USD,task.RMB,task.RUB,setTask,setList,setForm])
 
     //http
     useEffect(() => {
@@ -207,9 +214,9 @@ function Counter(){
     return (
         <>
             <Header>
-                <MyInput placeholder="task" name="name" value={ task.name } onChange={ inputHandleChange }></MyInput>
-                <MyInput placeholder="price" name="price" value={ task.price } onChange={ inputHandleChange }></MyInput>
-                <MySelect placeholder="currency" style={{ width: 240 }} value={ task.currency } onChange={ selectHandleChange }>
+                <MyInput placeholder="task" name="name" value={ form.name } onChange={ inputHandleChange }></MyInput>
+                <MyInput placeholder="price" name="price" value={ form.price } onChange={ inputHandleChange }></MyInput>
+                <MySelect placeholder="currency" style={{ width: 240 }} value={ form.currency } onChange={ selectHandleChange }>
                     <Option value="RMB">RMB</Option>
                     <Option value="RUB">RUB</Option>
                     <Option value="USD">USD</Option>
@@ -248,14 +255,14 @@ function Counter(){
             <Paragraph>
                 <div>Will cost：</div>
                 <div>
-                    <Text>{ list.filter( item => item.complete === false ).map( item => { return parseFloat(item.RUB) }).reduce((prev, item) => {
-                        return prev + item
-                    }, 0).toFixed(5) }$</Text>
-                    <Text>{ list.filter( item => item.complete === false ).map( item => { return parseFloat(item.RMB) }).reduce((prev, item) => {
-                        return prev + item
-                    }, 0).toFixed(5) }$</Text>
-                    <Text>{ list.filter( item => item.complete === false ).map( item => { return parseFloat(item.USD) }).reduce((prev, item) => {
-                        return prev + item
+                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
+                        return prev + parseFloat(item.RUB)
+                    }, 0).toFixed(5) }₽</Text>
+                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
+                        return prev + parseFloat(item.RMB)
+                    }, 0).toFixed(5) }￥</Text>
+                    <Text>{ list.filter( item => item.complete === false ).reduce((prev, item) => {
+                        return prev + parseFloat(item.USD)
                     }, 0).toFixed(5) }$</Text>
                 </div>
             </Paragraph>
@@ -283,14 +290,14 @@ function Counter(){
             <Paragraph>
                 <div>total：</div>
                 <div>
-                    <Text>{ list.filter( item => item.complete === true ).map( item => { return parseFloat(item.RUB) }).reduce((prev, item) => {
-                        return prev + item
-                    }, 0).toFixed(5) }$</Text>
-                    <Text>{ list.filter( item => item.complete === true ).map( item => { return parseFloat(item.RMB) }).reduce((prev, item) => {
-                        return prev + item
-                    }, 0).toFixed(5) }$</Text>
-                    <Text>{ list.filter( item => item.complete === true ).map( item => { return parseFloat(item.USD) }).reduce((prev, item) => {
-                        return prev + item
+                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
+                        return prev + parseFloat(item.RUB)
+                    }, 0).toFixed(5) }₽</Text>
+                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
+                        return prev + parseFloat(item.RMB)
+                    }, 0).toFixed(5) }￥</Text>
+                    <Text>{ list.filter( item => item.complete === true ).reduce((prev, item) => {
+                        return prev + parseFloat(item.USD)
                     }, 0).toFixed(5) }$</Text>
                 </div>
             </Paragraph>

@@ -26,11 +26,9 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="462a3e20-9a79-4516-a49c-cb98b06c8cc6" name="Default Changelist" comment="add env file">
+    <list default="true" id="462a3e20-9a79-4516-a49c-cb98b06c8cc6" name="Default Changelist" comment="fix await,dep,total">
       <change beforePath="$PROJECT_DIR$/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintcache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Counter/Counter.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Counter/Counter.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -74,7 +72,8 @@
       <workItem from="1612689696087" duration="1557000" />
       <workItem from="1612896983826" duration="2432000" />
       <workItem from="1612956559338" duration="370000" />
-      <workItem from="1612959971851" duration="7996000" />
+      <workItem from="1612959971851" duration="8260000" />
+      <workItem from="1613014876562" duration="4282000" />
     </task>
     <task id="LOCAL-00001" summary="use useimmer to do it">
       <created>1612692134070</created>
@@ -90,7 +89,14 @@
       <option name="project" value="LOCAL" />
       <updated>1612899257064</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="fix await,dep,total">
+      <created>1612969997448</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1612969997448</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -123,7 +129,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="use useimmer to do it" />
     <MESSAGE value="add env file" />
-    <option name="LAST_COMMIT_MESSAGE" value="add env file" />
+    <MESSAGE value="fix await,dep,total" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix await,dep,total" />
     <option name="GROUP_MULTIFILE_MERGE_BY_DIRECTORY" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -155,9 +162,9 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="596" y="280" key="MultipleFileMergeDialog/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1612897017130" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1612899292436">
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1612970072009">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1612899292436" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1612970072009" />
   </component>
 </project>
