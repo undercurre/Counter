@@ -3,15 +3,13 @@ import axios from 'axios';
 import "antd/dist/antd.css";
 import { useImmer } from "use-immer"
 import SHA256 from "crypto-js/sha256";
+import myContext from '../context'
 
-import { Input, Select, Button, List, Checkbox, Collapse } from "antd";
+import { Input, Select, Button } from "antd";
 import styled from 'styled-components'
+import SumList from "../SumList/SumList";
 
 //styled-component
-
-const MyCollapse = styled(Collapse)`
-        border: none;   
-`
 
 const MyInput = styled(Input)`
     margin: 10px;
@@ -34,16 +32,6 @@ const Paragraph = styled.div`
     justify-content: space-between;
     padding: 10px;
     padding-right: 272px;
-`
-
-const Title = styled.div`
-    margin-left: 10px;
-`
-
-const ListParagraph = styled(Paragraph)`
-    padding: 10px 0;
-    padding-left: 10px;
-    padding-right: 30px;
 `
 
 const Text = styled.span`
@@ -70,78 +58,7 @@ const MyButton = styled(Button)`
         }
 `
 
-const MyList = styled(List)`
-    border: 1px solid #696969;
-    box-sizing: border-box;
-    border-radius: 0;
-    display: flex;
-    justify-content: center;
-    .ant-spin-nested-loading{
-        width: 100%;
-        .ant-list{
-            width: 100%;
-        }
-        .ant-collapse-items{
-            padding: 0;
-            margin: 0;
-        }
-    }
-    .ant-list-item{
-        border: none;
-        padding: 0;
-        background: #fff;
-        .ant-list-empty-text{
-            padding: 0;
-        }
-        .ant-collapse{
-            width: 100%;
-        }
-        .ant-collapse-item{
-            width: 100%;
-        }
-        .ant-collapse-header{
-            border: none;
-            padding: 0;
-        }
-        .ant-collapse-content{
-            border: none;
-            .ant-collapse-content-box{
-                border-radius: 0;
-                padding: 0;
-            }
-        }
-        .ant-list-item{
-                padding-right: 0;
-                padding-left: 0; 
-                background: #ddd;
-                border: 1px solid #696969;
-                vertical-align: middle;
-                .ant-collapse-header{
-                    border-radius: 0;
-                }
-                .ant-collapse-item{
-                    border: none;
-                }
-        }
-    }
-`
-
-const MyCheckbox = styled(Checkbox)`
-    font-size: 10px;
-    .ant-checkbox-inner{
-        background: #fff;
-        border: 2px solid #696969;
-        border-radius: 0;
-        ::after{
-            border: 2px solid #696969;
-            border-top: 0;
-            border-left: 0;
-        }
-    }
-`
-
 const { Option } = Select;
-const { Panel } = Collapse;
 
 function Counter(){
     //state
@@ -150,21 +67,11 @@ function Counter(){
        price: "",
        currency: null,
     });
-    const [transaction, setTransaction] = useImmer({
-            id: Number(Math.random().toString().substr(3,6) + Date.now()).toString(36),
-            name: "",
-            complete: false,
-            RMB: 0,
-            RUB: 0,
-            USD: 0,
-            timestamp: null,
-            txhash: ''
-    });
     const [rate, setRate] = useImmer({
             RUB: 0,
             USD: 0
     });
-    const [difficulty,setDifficulty] = useImmer(4);
+    const [difficulty] = useImmer(2);
     const [chain, setChain] = useImmer([{
         index : 0,
         previousHash : '',
@@ -173,16 +80,9 @@ function Counter(){
         hash : calculateHash(0,'',new Date(),[],0),
         nonce: 0
     }]);
-    const [block, setBlock] = useImmer({
-        index: 0,
-        previousHash: '',
-        timestamp: new Date(),
-        data: [],
-        hash: calculateHash(0,'',new Date(),[],0),
-        nonce: 0
-    });
 
-    //method
+    //methods
+    //UI methods
     const add = () => {
         //form-check
         if (!form.name){
@@ -198,35 +98,65 @@ function Counter(){
             return 
         }
         //state manager
-        setTransaction( draft => {
-            draft.name = form.name;
-            draft.timestamp = new Date();
-            switch (form.currency) {
+        let transaction = {
+            complete: false,
+            id: Number(Math.random().toString().substr(3,6) + Date.now()).toString(36)
+        };
+        transaction.name = form.name;
+        transaction.timestamp = new Date();
+        switch (form.currency) {
                 case 'RUB':
-                    draft.RUB = Number(form.price).toFixed(3);
-                    draft.RMB = (draft.RUB / rate.RUB).toFixed(3);
-                    draft.USD = (draft.RMB * rate.USD).toFixed(3);
+                    transaction.RUB = Number(form.price).toFixed(3);
+                    transaction.RMB = (transaction.RUB / rate.RUB).toFixed(3);
+                    transaction.USD = (transaction.RMB * rate.USD).toFixed(3);
                     break;
 
                 case 'RMB':
-                    draft.RMB = Number(form.price).toFixed(3);
-                    draft.RUB = (draft.RMB * rate.RUB).toFixed(3);
-                    draft.USD = (draft.RMB * rate.USD).toFixed(3);
+                    transaction.RMB = Number(form.price).toFixed(3);
+                    transaction.RUB = (transaction.RMB * rate.RUB).toFixed(3);
+                    transaction.USD = (transaction.RMB * rate.USD).toFixed(3);
                     break;
 
                 case 'USD':
-                    draft.USD = Number(form.price).toFixed(3);
-                    draft.RMB = (draft.USD / rate.USD).toFixed(3);
-                    draft.RUB = (draft.RMB * rate.RUB).toFixed(3);
+                    transaction.USD = Number(form.price).toFixed(3);
+                    transaction.RMB = (transaction.USD / rate.USD).toFixed(3);
+                    transaction.RUB = (transaction.RMB * rate.RUB).toFixed(3);
                     break;
 
                 default:
-                    draft.RMB = 0;
-                    draft.RUB = 0;
-                    draft.USD = 0;
-            }
-            draft.txhash = calculateTxHash(draft.id, draft.name, draft.RUB, draft.RMB, draft.USD, draft.timestamp, draft.complete)
-        })
+                    transaction.RMB = 0;
+                    transaction.RUB = 0;
+                    transaction.USD = 0;
+        }
+        transaction.txhash = calculateTxHash(transaction.id, transaction.name, transaction.RUB, transaction.RMB, transaction.USD, transaction.timestamp, transaction.complete)
+        if (!isLastestBlockFull()) {
+                setChain( draft => {
+                    draft[chain.length-1].data.push(transaction);
+                    draft[chain.length-1].hash = calculateHash(draft[chain.length-1].index, draft[chain.length-1].previousHash, draft[chain.length-1].timestamp, draft[chain.length-1].data);
+                });
+                setForm( draft => {
+                    draft.name = '';
+                    draft.price = '';
+                    draft.currency = null;
+                });
+        } else {
+                let block = {
+                    data: []
+                };
+                block.index = chain[chain.length-1].index + 1;
+                block.previousHash =  chain[chain.length-1].hash;
+                    let now = new Date();
+                block.timestamp = now;
+                block.data.push(transaction);
+                block.nonce = 0;
+                block.hash = calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.nonce);
+                let miner = mineBlock(difficulty, block);
+                block.nonce = miner.nonce;
+                block.hash = miner.hash;
+                setChain(draft => {
+                    draft.push(block);
+                })
+        }
     }
 
     function getChain() {
@@ -234,50 +164,11 @@ function Counter(){
         console.log(chain);
     }
 
-    //collapse
-    function callback(key) {
-        console.log(key);
-    }
-
     //select change
     function selectHandleChange(value) {
         setForm( draft => {
             draft["currency"] = value
         });
-    }
-
-    //checkbox onChange
-    function onChange(e) {
-        let currentTx = chain.map( item => { return item.data } ).reduce((prev, item) => {
-            return prev.concat(item)
-        }).filter( item => item.txhash === e.target.value );
-        let now = new Date();
-        let newTx = {
-            id: currentTx[0].id,
-            name: currentTx[0].name,
-            complete: !currentTx[0].complete,
-            RUB: currentTx[0].RUB,
-            RMB: currentTx[0].RMB,
-            USD: currentTx[0].USD,
-            timestamp: now,
-            txhash: calculateTxHash(currentTx[0].id, currentTx[0].name, currentTx[0].RUB, currentTx[0].RMB, currentTx[0].USD, now, !currentTx[0].complete)
-        }
-        if ( !isLastestBlockFull() ) {
-            setChain( draft => {
-                draft[chain.length-1].data.push(newTx);
-                draft[chain.length-1].hash = calculateHash(draft[chain.length-1].index, draft[chain.length-1].previousHash, draft[chain.length-1].timestamp, draft[chain.length-1].data);
-            });
-        } else {
-            setBlock( draft => {
-                draft.index = chain[chain.length-1].index + 1;
-                draft.previousHash =  chain[chain.length-1].hash;
-                let now = new Date();
-                draft.timestamp = now;
-                draft.data.push(newTx);
-                draft.nonce = mineBlock(difficulty, draft.hash, draft.nonce, draft).nonce;
-                draft.hash = mineBlock(difficulty, draft.hash, draft.nonce, draft).hash;
-            })
-        }
     }
 
     //input change
@@ -303,62 +194,18 @@ function Counter(){
        return false
     }
 
-    function mineBlock(difficulty, hash, nonce, draft) {
-        hash = calculateHash(draft.index, draft.previousHash, draft.timestamp, draft.data, draft.nonce);
+    function mineBlock(difficulty, block) {
+        let nonce = 0;
+        let hash = block.hash;
         while (hash.substring(0, difficulty) !== Array(difficulty +1).join("0")) {
             nonce++;
-            hash = calculateHash(draft.index, draft.previousHash, draft.timestamp, draft.data, nonce);
-            console.log(nonce);
-            console.log(hash);
+            hash = calculateHash(block.index, block.previousHash, block.timestamp, block.data, nonce);
         }
         return {
             hash: hash,
             nonce: nonce
         }
     }
-
-    useEffect( () => {
-        if (block.index === 0){
-            return
-        } else {
-            setChain(draft => {
-                draft.push(block);
-            })
-        }
-    },[setChain,block.index])
-
-    useEffect( () => {
-        console.log(block);
-    },[block.hash])
-
-    useEffect( () => {
-        if (transaction.USD && transaction.RMB && transaction.RUB){
-                if (!isLastestBlockFull()) {
-                    setChain( draft => {
-                        draft[chain.length-1].data.push(transaction);
-                        draft[chain.length-1].hash = calculateHash(draft[chain.length-1].index, draft[chain.length-1].previousHash, draft[chain.length-1].timestamp, draft[chain.length-1].data);
-                    });
-                    setTransaction( draft => {
-                        draft.id = Number(Math.random().toString().substr(3,6) + Date.now()).toString(36);
-                    });
-                    setForm( draft => {
-                        draft.name = '';
-                        draft.price = '';
-                        draft.currency = null;
-                    });
-                } else {
-                    setBlock( draft => {
-                        draft.index = chain[chain.length-1].index + 1;
-                        draft.previousHash =  chain[chain.length-1].hash;
-                        let now = new Date();
-                        draft.timestamp = now;
-                        draft.data.push(transaction);
-                        draft.nonce = mineBlock(difficulty, draft.hash, draft.nonce, draft).nonce;
-                        draft.hash = mineBlock(difficulty, draft.hash, draft.nonce, draft).hash;
-                    })
-                }
-        }
-    },[transaction.USD,transaction.RMB,transaction.RUB,setTransaction,setForm,setBlock,setChain])
 
     //http
     useEffect(() => {
@@ -398,220 +245,27 @@ function Counter(){
                     <Text>{ (1/rate.USD).toFixed(3) }￥/$</Text>
                 </div>
             </Paragraph>
-            <Title>Plan：</Title>
-                <MyList
-                        bordered
-                        dataSource={ chain }
-                        renderItem={ itemBlock => (
-                            <List.Item
-                                key={ itemBlock.hash }
-                            >
-                                <List
-                                    locale = { ((itemBlock.data.filter( item => item.complete === false ).length === 0)&&!(chain[0].data.length === 0)) ? {emptyText: " "}:{emptyText: ""} }
-                                    bordered = { false }
-                                    dataSource={ itemBlock.data.filter( item => item.complete === false ) }
-                                    renderItem={ itemTx => (
-                                        <List.Item
-                                            key={ itemTx.txhash }
-                                        >
-                                            <MyCollapse
-                                                defaultActiveKey={[]}
-                                                onChange={callback}
-                                                expandIconPosition={'right'}
-                                            >
-                                                <Panel header={
-                                                    <ListParagraph>
-                                                                <div>
-                                                                        <MyCheckbox checked={ itemTx.complete } value={ itemTx.txhash } onChange={ onChange }>{ itemTx.name }</MyCheckbox>
-                                                                </div>
-                                                                <div>
-                                                                    <Text>{ itemTx.RUB }₽</Text>
-                                                                    <Text>{ itemTx.RMB }￥</Text>
-                                                                    <Text>{ itemTx.USD }$</Text>
-                                                                    <Text>prevHash:{ itemBlock.previousHash }</Text>
-                                                                    <Text>hash:{ itemBlock.hash }</Text>
-                                                                    <Text>txHash:{ itemTx.txhash }</Text>
-                                                                </div>
-                                                    </ListParagraph>
-                                                } key={itemTx.hash}>
-                                                    <List
-                                                        bordered = { false }
-                                                        dataSource={ chain.map( item => {
-                                                            let out = [];
-                                                            for (let tx of item.data){
-                                                                out.push({
-                                                                    previousHash : item.previousHash,
-                                                                    hash : item.hash,
-                                                                    id : tx.id,
-                                                                    name : tx.name,
-                                                                    complete : tx.complete,
-                                                                    RMB : tx.RMB,
-                                                                    RUB : tx.RUB,
-                                                                    USD : tx.USD,
-                                                                    timestamp : tx.timestamp,
-                                                                    txhash : tx.txhash
-                                                                });
-                                                            }
-                                                            return out
-                                                        } ).reduce((prev, item) => {
-                                                            return prev.concat(item)
-                                                        }).filter( item => item.id === itemTx.id ) }
-                                                        renderItem={ item => (
-                                                            <List.Item
-                                                                key={ item.txhash }
-                                                            >
-                                                                <ListParagraph>
-                                                                    <div>
-                                                                        <MyCheckbox disabled checked={ item.complete } value={ item.txhash } onChange={ onChange }>{ item.name }</MyCheckbox>
-                                                                    </div>
-                                                                    <div>
-                                                                        <Text>{ item.RUB }₽</Text>
-                                                                        <Text>{ item.RMB }￥</Text>
-                                                                        <Text>{ item.USD }$</Text>
-                                                                        <Text>prevHash:{ item.previousHash }</Text>
-                                                                        <Text>hash:{ item.hash }</Text>
-                                                                        <Text>txHash:{ item.txhash }</Text>
-                                                                    </div>
-                                                                </ListParagraph>
-                                                            </List.Item>
-                                                        )}
-                                                    />
-                                                </Panel>
-                                            </MyCollapse>
-                                        </List.Item>
-                                    )}
-                                />
-                            </List.Item>
-                        )}
-                />
-            <Paragraph>
-                <div>Cost：</div>
-                <div>
-                    <Text>{ chain.map( item => { return item.data } ).reduce((prev, item) => {
-                        return prev.concat(item)
-                    }).filter( item => item.complete === false ).reduce((prev, item) => {
-                        return prev + parseFloat(item.RUB)
-                    }, 0).toFixed(3) }₽</Text>
-                    <Text>{ chain.map( item => { return item.data } ).reduce((prev, item) => {
-                        return prev.concat(item)
-                    }).filter( item => item.complete === false ).reduce((prev, item) => {
-                        return prev + parseFloat(item.RMB)
-                    }, 0).toFixed(3) }￥</Text>
-                    <Text>{ chain.map( item => { return item.data } ).reduce((prev, item) => {
-                        return prev.concat(item)
-                    }).filter( item => item.complete === false ).reduce((prev, item) => {
-                        return prev + parseFloat(item.USD)
-                    }, 0).toFixed(3) }$</Text>
+            <myContext.Provider value={{
+                listTitle: 'Plan：',
+                sumTitle: 'Cost：',
+                data: chain,
+                judge: false,
+                setData: setChain,
+                difficulty: difficulty
+            }}>
+                <SumList></SumList>
+            </myContext.Provider>
 
-                </div>
-            </Paragraph>
-            <Title>Complete：</Title>
-                <MyList
-                    bordered
-                    dataSource={ chain }
-                    renderItem={ itemBlock => (
-                        <List.Item
-                            key={ itemBlock.hash }
-                        >
-                            <List
-                                locale = { ((itemBlock.data.filter( item => item.complete === true ).length === 0)&&!(chain[0].data.length === 0)) ? {emptyText: " "}:{emptyText: ""} }
-                                bordered = { false }
-                                dataSource={ itemBlock.data.filter( item => item.complete === true ) }
-                                renderItem={ itemTx => (
-                                    <List.Item
-                                        key={ itemTx.txhash }
-                                    >
-                                        <MyCollapse
-                                            defaultActiveKey={[]}
-                                            onChange={callback}
-                                            expandIconPosition={'right'}
-                                        >
-                                            <Panel header={
-                                                <ListParagraph>
-                                                            <div>
-                                                                    <MyCheckbox checked={ itemTx.complete } value={ itemTx.txhash } onChange={ onChange }><del>{ itemTx.name }</del></MyCheckbox>
-                                                            </div>
-                                                            <div>
-                                                                <Text>{ itemTx.RUB }₽</Text>
-                                                                <Text>{ itemTx.RMB }￥</Text>
-                                                                <Text>{ itemTx.USD }$</Text>
-                                                                <Text>prevHash:{ itemBlock.previousHash }</Text>
-                                                                <Text>hash:{ itemBlock.hash }</Text>
-                                                                <Text>txHash:{ itemTx.txhash }</Text>
-                                                            </div>
-                                                </ListParagraph>
-                                                } key={itemTx.id}>
-                                                <List
-                                                    bordered = { false }
-                                                    dataSource={ chain.map( item => {
-                                                        let out = [];
-                                                        for (let tx of item.data){
-                                                            out.push({
-                                                                previousHash : item.previousHash,
-                                                                hash : item.hash,
-                                                                id : tx.id,
-                                                                name : tx.name,
-                                                                complete : tx.complete,
-                                                                RMB : tx.RMB,
-                                                                RUB : tx.RUB,
-                                                                USD : tx.USD,
-                                                                timestamp : tx.timestamp,
-                                                                txhash : tx.txhash
-                                                            });
-                                                        }
-                                                        return out
-                                                    } ).reduce((prev, item) => {
-                                                        return prev.concat(item)
-                                                    }).filter( item => item.id === itemTx.id ) }
-                                                    renderItem={ item => (
-                                                        <List.Item
-                                                            key={ item.txhash }
-                                                        >
-                                                            <ListParagraph>
-                                                                <div>
-                                                                    <MyCheckbox disabled checked={ item.complete } value={ item.txhash } onChange={ onChange }>{ item.name }</MyCheckbox>
-                                                                </div>
-                                                                <div>
-                                                                    <Text>{ item.RUB }₽</Text>
-                                                                    <Text>{ item.RMB }￥</Text>
-                                                                    <Text>{ item.USD }$</Text>
-                                                                    <Text>prevHash:{ item.previousHash }</Text>
-                                                                    <Text>hash:{ item.hash }</Text>
-                                                                    <Text>txHash:{ item.txhash }</Text>
-                                                                </div>
-                                                            </ListParagraph>
-                                                        </List.Item>
-                                                    )}
-                                                />
-                                            </Panel>
-                                        </MyCollapse>
-                                    </List.Item>
-                                )}
-                            />
-                        </List.Item>
-                    )}
-                />
-            <Paragraph>
-                <div>Total：</div>
-                <div>
-                    <Text>{ chain.map( item => { return item.data } ).reduce((prev, item) => {
-                        return prev.concat(item)
-                    }).filter( item => item.complete === true ).reduce((prev, item) => {
-                        return prev + parseFloat(item.RUB)
-                    }, 0).toFixed(3) }₽</Text>
-                    <Text>{ chain.map( item => { return item.data } ).reduce((prev, item) => {
-                        return prev.concat(item)
-                    }).filter( item => item.complete === true ).reduce((prev, item) => {
-                        return prev + parseFloat(item.RMB)
-                    }, 0).toFixed(3) }￥</Text>
-                    <Text>{ chain.map( item => { return item.data } ).reduce((prev, item) => {
-                        return prev.concat(item)
-                    }).filter( item => item.complete === true ).reduce((prev, item) => {
-                        return prev + parseFloat(item.USD)
-                    }, 0).toFixed(3) }$</Text>
-
-                </div>
-            </Paragraph>
+            <myContext.Provider value={{
+                listTitle: 'Complete：',
+                sumTitle: 'Total：',
+                data: chain,
+                judge: true,
+                setData: setChain,
+                difficulty: difficulty
+            }}>
+                <SumList></SumList>
+            </myContext.Provider>
         </>
     );
 }

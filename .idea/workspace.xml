@@ -21,22 +21,30 @@
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
         <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
         <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="BRANCH:origin/master" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:origin/block" type="e8cecc67:BranchNodeDescriptor" />
       </path>
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="462a3e20-9a79-4516-a49c-cb98b06c8cc6" name="Default Changelist" comment="fix await,dep,total">
+    <list default="true" id="462a3e20-9a79-4516-a49c-cb98b06c8cc6" name="Default Changelist" comment="block">
+      <change afterPath="$PROJECT_DIR$/src/Judgebox/Judgebox.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/SumList/SumList.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/context.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintcache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Counter/Counter.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Counter/Counter.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Rebase.Settings">
     <option name="NEW_BASE" value="refs/remotes/origin/master" />
@@ -84,7 +92,9 @@
       <workItem from="1613531791706" duration="14484000" />
       <workItem from="1613559372491" duration="96000" />
       <workItem from="1613572641905" duration="14271000" />
-      <workItem from="1613618199559" duration="32545000" />
+      <workItem from="1613618199559" duration="33380000" />
+      <workItem from="1613722200758" duration="19558000" />
+      <workItem from="1613749811798" duration="4623000" />
     </task>
     <task id="LOCAL-00001" summary="use useimmer to do it">
       <created>1612692134070</created>
@@ -114,7 +124,14 @@
       <option name="project" value="LOCAL" />
       <updated>1613022067128</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="block">
+      <created>1613666101537</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1613666101537</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -131,7 +148,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/master" />
+                        <option value="origin/block" />
                       </list>
                     </value>
                   </entry>
@@ -149,7 +166,8 @@
     <MESSAGE value="add env file" />
     <MESSAGE value="fix await,dep,total" />
     <MESSAGE value="add form and fix reduce" />
-    <option name="LAST_COMMIT_MESSAGE" value="add form and fix reduce" />
+    <MESSAGE value="block" />
+    <option name="LAST_COMMIT_MESSAGE" value="block" />
     <option name="GROUP_MULTIFILE_MERGE_BY_DIRECTORY" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -181,9 +199,13 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="596" y="280" key="MultipleFileMergeDialog/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1612897017130" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1613022079277">
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1613666431018">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1613022079277" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1613666431018" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1613754337537">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1613754337537" />
   </component>
 </project>
