@@ -63,6 +63,7 @@ const MyList = styled(List)`
         }
         .ant-collapse-item{
             width: 100%;
+            border: none;
         }
         .ant-collapse-header{
             border: none;
@@ -112,29 +113,48 @@ function SumList() {
                 <Title>{listTitle}</Title>
                 <MyList
                     bordered
-                    dataSource={ data }
-                    renderItem={ itemBlock => (
+                    dataSource={ data.map( item => {
+                        let out = [];
+                        for (let tx of item.data){
+                            out.push({
+                                previousHash : item.previousHash,
+                                hash : item.hash,
+                                id : tx.id,
+                                name : tx.name,
+                                complete : tx.complete,
+                                RMB : tx.RMB,
+                                RUB : tx.RUB,
+                                USD : tx.USD,
+                                timestamp : tx.timestamp,
+                                txhash : tx.txhash
+                            });
+                        }
+                        return out
+                    } ).reduce((prev, item) => {
+                        return prev.concat(item)
+                    }).reduce((prev,item) => {
+                        let index = prev.findIndex( prevItem => prevItem.id === item.id )
+                        if (index !== -1) {
+                            prev[index] = item;
+                        } else {
+                            prev.push(item);
+                        }
+                        return prev
+                    },[]).filter( item => item.complete === judge ) }
+                    renderItem={ item => (
                         <List.Item
-                            key={ itemBlock.hash }
+                            key={ item.id }
                         >
-                            <List
-                                locale = { ((itemBlock.data.filter( item => item.complete === judge ).length === 0)&&!(data[0].data.length === 0)) ? {emptyText: " "}:{emptyText: ""} }
-                                bordered = { false }
-                                dataSource={ itemBlock.data.filter( item => item.complete === judge ) }
-                                renderItem={ itemTx => (
-                                    <List.Item
-                                        key={ itemTx.txhash }
-                                    >
-                                        <MyCollapse
-                                            defaultActiveKey={[]}
-                                            onChange={callback}
-                                            expandIconPosition={'right'}
-                                        >
-                                            <Panel header={
-                                                <ListParagraph>
+                            <MyCollapse
+                                defaultActiveKey={[]}
+                                onChange={callback}
+                                expandIconPosition={'right'}
+                            >
+                                <Panel header={
+                                    <ListParagraph>
                                                     <div>
                                                         <myContext.Provider value={{
-                                                            data: itemTx,
+                                                            data: item,
                                                             judge: judge,
                                                             chain: data,
                                                             setChain: setData,
@@ -144,23 +164,23 @@ function SumList() {
                                                         </myContext.Provider>
                                                     </div>
                                                     <div>
-                                                        <Text>{ itemTx.RUB }₽</Text>
-                                                        <Text>{ itemTx.RMB }￥</Text>
-                                                        <Text>{ itemTx.USD }$</Text>
-                                                        <Text>prevHash:{ itemBlock.previousHash }</Text>
-                                                        <Text>hash:{ itemBlock.hash }</Text>
-                                                        <Text>txHash:{ itemTx.txhash }</Text>
+                                                        <Text>{ item.RUB }₽</Text>
+                                                        <Text>{ item.RMB }￥</Text>
+                                                        <Text>{ item.USD }$</Text>
+                                                        <Text>prevHash:{ item.previousHash }</Text>
+                                                        <Text>hash:{ item.hash }</Text>
+                                                        <Text>txHash:{ item.txhash }</Text>
                                                     </div>
-                                                </ListParagraph>
-                                            } key={itemTx.id}>
+                                    </ListParagraph>
+                                } key={item.id}>
                                                 <List
                                                     bordered = { false }
-                                                    dataSource={ data.map( item => {
+                                                    dataSource={ data.map( itemMap => {
                                                         let out = [];
-                                                        for (let tx of item.data){
+                                                        for (let tx of itemMap.data){
                                                             out.push({
-                                                                previousHash : item.previousHash,
-                                                                hash : item.hash,
+                                                                previousHash : itemMap.previousHash,
+                                                                hash : itemMap.hash,
                                                                 id : tx.id,
                                                                 name : tx.name,
                                                                 complete : tx.complete,
@@ -172,18 +192,18 @@ function SumList() {
                                                             });
                                                         }
                                                         return out
-                                                    } ).reduce((prev, item) => {
-                                                        return prev.concat(item)
-                                                    }).filter( item => item.id === itemTx.id ) }
-                                                    renderItem={ item => (
+                                                    } ).reduce((prev, current) => {
+                                                        return prev.concat(current)
+                                                    }).filter( itemFiltering => itemFiltering.id === item.id ) }
+                                                    renderItem={ itemPanel => (
                                                         <List.Item
-                                                            key={ item.txhash }
+                                                            key={ itemPanel.txhash }
                                                         >
                                                             <ListParagraph>
                                                                 <div>
                                                                     <myContext.Provider value={{
-                                                                        data: item,
-                                                                        judge: item.complete,
+                                                                        data: itemPanel,
+                                                                        judge: itemPanel.complete,
                                                                         chain: data,
                                                                         setChain: setData,
                                                                         difficulty: difficulty
@@ -192,12 +212,12 @@ function SumList() {
                                                                     </myContext.Provider>
                                                                 </div>
                                                                 <div>
-                                                                    <Text>{ item.RUB }₽</Text>
-                                                                    <Text>{ item.RMB }￥</Text>
-                                                                    <Text>{ item.USD }$</Text>
-                                                                    <Text>prevHash:{ item.previousHash }</Text>
-                                                                    <Text>hash:{ item.hash }</Text>
-                                                                    <Text>txHash:{ item.txhash }</Text>
+                                                                    <Text>{ itemPanel.RUB }₽</Text>
+                                                                    <Text>{ itemPanel.RMB }￥</Text>
+                                                                    <Text>{ itemPanel.USD }$</Text>
+                                                                    <Text>prevHash:{ itemPanel.previousHash }</Text>
+                                                                    <Text>hash:{ itemPanel.hash }</Text>
+                                                                    <Text>txHash:{ itemPanel.txhash }</Text>
                                                                 </div>
                                                             </ListParagraph>
                                                         </List.Item>
@@ -205,9 +225,6 @@ function SumList() {
                                                 />
                                             </Panel>
                                         </MyCollapse>
-                                    </List.Item>
-                                )}
-                            />
                         </List.Item>
                     )}
                 />
@@ -216,17 +233,41 @@ function SumList() {
                 <div>
                     <Text>{ data.map( item => { return item.data } ).reduce((prev, item) => {
                         return prev.concat(item)
-                    }).filter( item => item.complete === judge ).reduce((prev, item) => {
+                    }).reduce((prev,item) => {
+                        let index = prev.findIndex( prevItem => prevItem.id === item.id )
+                        if (index !== -1) {
+                            prev[index] = item;
+                        } else {
+                            prev.push(item);
+                        }
+                        return prev
+                    },[]).filter( item => item.complete === judge ).reduce((prev, item) => {
                         return prev + parseFloat(item.RUB)
                     }, 0).toFixed(3) }₽</Text>
                     <Text>{ data.map( item => { return item.data } ).reduce((prev, item) => {
                         return prev.concat(item)
-                    }).filter( item => item.complete === judge ).reduce((prev, item) => {
+                    }).reduce((prev,item) => {
+                        let index = prev.findIndex( prevItem => prevItem.id === item.id )
+                        if (index !== -1) {
+                            prev[index] = item;
+                        } else {
+                            prev.push(item);
+                        }
+                        return prev
+                    },[]).filter( item => item.complete === judge ).reduce((prev, item) => {
                         return prev + parseFloat(item.RMB)
                     }, 0).toFixed(3) }￥</Text>
                     <Text>{ data.map( item => { return item.data } ).reduce((prev, item) => {
                         return prev.concat(item)
-                    }).filter( item => item.complete === judge ).reduce((prev, item) => {
+                    }).reduce((prev,item) => {
+                        let index = prev.findIndex( prevItem => prevItem.id === item.id )
+                        if (index !== -1) {
+                            prev[index] = item;
+                        } else {
+                            prev.push(item);
+                        }
+                        return prev
+                    },[]).filter( item => item.complete === judge ).reduce((prev, item) => {
                         return prev + parseFloat(item.USD)
                     }, 0).toFixed(3) }$</Text>
                 </div>

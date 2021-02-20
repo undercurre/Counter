@@ -26,13 +26,10 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="462a3e20-9a79-4516-a49c-cb98b06c8cc6" name="Default Changelist" comment="block">
-      <change afterPath="$PROJECT_DIR$/src/Judgebox/Judgebox.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SumList/SumList.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/context.js" afterDir="false" />
+    <list default="true" id="462a3e20-9a79-4516-a49c-cb98b06c8cc6" name="Default Changelist" comment="fixed block">
       <change beforePath="$PROJECT_DIR$/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintcache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Counter/Counter.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Counter/Counter.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SumList/SumList.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/SumList/SumList.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +91,8 @@
       <workItem from="1613572641905" duration="14271000" />
       <workItem from="1613618199559" duration="33380000" />
       <workItem from="1613722200758" duration="19558000" />
-      <workItem from="1613749811798" duration="4623000" />
+      <workItem from="1613749811798" duration="4784000" />
+      <workItem from="1613811862093" duration="6281000" />
     </task>
     <task id="LOCAL-00001" summary="use useimmer to do it">
       <created>1612692134070</created>
@@ -131,7 +129,14 @@
       <option name="project" value="LOCAL" />
       <updated>1613666101537</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="fixed block">
+      <created>1613754499010</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1613754499010</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -167,7 +172,8 @@
     <MESSAGE value="fix await,dep,total" />
     <MESSAGE value="add form and fix reduce" />
     <MESSAGE value="block" />
-    <option name="LAST_COMMIT_MESSAGE" value="block" />
+    <MESSAGE value="fixed block" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed block" />
     <option name="GROUP_MULTIFILE_MERGE_BY_DIRECTORY" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -199,10 +205,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="596" y="280" key="MultipleFileMergeDialog/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1612897017130" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1613666431018">
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1613754528214">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1613666431018" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1613754528214" />
     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1613754337537">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
