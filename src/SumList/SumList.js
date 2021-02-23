@@ -55,6 +55,10 @@ const MyList = styled(List)`
         border: none;
         padding: 0;
         background: #fff;
+        border: 1px solid #696969;
+        :last-child{
+            border-bottom: 1px solid #696969;
+        }
         .ant-list-empty-text{
             padding: 0;
         }
@@ -100,7 +104,7 @@ const { Panel } = Collapse;
 
 function SumList() {
 
-    const { data,listTitle,sumTitle,judge,setData,difficulty } = useContext(myContext);
+    const { data,listTitle,sumTitle,judge,setData,difficulty,wait,setWait,queue,setQueue,setIsAdding } = useContext(myContext);
 
     //collapse
     function callback(key) {
@@ -158,7 +162,12 @@ function SumList() {
                                                             judge: judge,
                                                             chain: data,
                                                             setChain: setData,
-                                                            difficulty: difficulty
+                                                            difficulty: difficulty,
+                                                            wait: wait,
+                                                            setWait: setWait,
+                                                            queue: queue,
+                                                            setQueue: setQueue,
+                                                            setIsAdding: setIsAdding,
                                                         }}>
                                                             <Judgebox/>
                                                         </myContext.Provider>
@@ -206,7 +215,12 @@ function SumList() {
                                                                         judge: itemPanel.complete,
                                                                         chain: data,
                                                                         setChain: setData,
-                                                                        difficulty: difficulty
+                                                                        difficulty: difficulty,
+                                                                        wait: wait,
+                                                                        setWait: setWait,
+                                                                        queue: queue,
+                                                                        setQueue: setQueue,
+                                                                        setIsAdding: setIsAdding,
                                                                     }}>
                                                                         <Judgebox></Judgebox>
                                                                     </myContext.Provider>

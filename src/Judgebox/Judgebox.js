@@ -20,13 +20,16 @@ const MyCheckbox = styled(Checkbox)`
 
 function Judgebox(){
 
-    const { data,judge,chain,setChain,difficulty } = useContext(myContext);
+    const { data,judge,chain,setChain,difficulty,wait,setWait,queue,setQueue,setIsAdding } = useContext(myContext);
 
     //Judgebox onChange
     function onChange(e) {
         let currentTx = chain.map( item => { return item.data } ).reduce((prev, item) => {
             return prev.concat(item)
         }).filter( item => item.txhash === e.target.value );
+        if (currentTx.length === 0){
+            currentTx = queue.filter( item => item.txhash === e.target.value );
+        }
         let now = new Date();
         let newTx = {
             id: currentTx[0].id,
@@ -44,22 +47,13 @@ function Judgebox(){
                 draft[chain.length-1].hash = calculateHash(draft[chain.length-1].index, draft[chain.length-1].previousHash, draft[chain.length-1].timestamp, draft[chain.length-1].data);
             });
         } else {
-            let block = {
-                data: []
-            };
-            block.index = chain[chain.length-1].index + 1;
-            block.previousHash =  chain[chain.length-1].hash;
-            let now = new Date();
-            block.timestamp = now;
-            block.data.push(newTx);
-            block.nonce = 0;
-            block.hash = calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.nonce);
-            let miner = mineBlock(difficulty, block);
-            block.nonce = miner.nonce;
-            block.hash = miner.hash;
-            setChain(draft => {
-                draft.push(block);
-            })
+            setQueue(q => {
+                q.push(newTx);
+            });
+            if (wait === 0){
+                setWait(difficulty);
+            }
+            setIsAdding(true);
         }
     }
 
@@ -77,19 +71,6 @@ function Judgebox(){
             return true
         }
         return false
-    }
-
-    function mineBlock(difficulty, block) {
-        let nonce = 0;
-        let hash = block.hash;
-        while (hash.substring(0, difficulty) !== Array(difficulty +1).join("0")) {
-            nonce++;
-            hash = calculateHash(block.index, block.previousHash, block.timestamp, block.data, nonce);
-        }
-        return {
-            hash: hash,
-            nonce: nonce
-        }
     }
 
     if (!judge) {

@@ -1,13 +1,14 @@
-import React,{ useEffect } from 'react';
+import React,{ useEffect,useState } from 'react';
 import axios from 'axios';
 import "antd/dist/antd.css";
 import { useImmer } from "use-immer"
 import SHA256 from "crypto-js/sha256";
 import myContext from '../context'
 
-import { Input, Select, Button } from "antd";
+import {Input, Select, Button, List} from "antd";
 import styled from 'styled-components'
 import SumList from "../SumList/SumList";
+import Judgebox from "../Judgebox/Judgebox";
 
 //styled-component
 
@@ -58,6 +59,77 @@ const MyButton = styled(Button)`
         }
 `
 
+const Title = styled.div`
+    margin-left: 10px;
+`
+
+const ListParagraph = styled(Paragraph)`
+    padding: 10px 0;
+    padding-left: 10px;
+    padding-right: 30px;
+`
+
+const MyList = styled(List)`
+    border: 1px solid #696969;
+    box-sizing: border-box;
+    border-radius: 0;
+    display: flex;
+    justify-content: center;
+    .ant-spin-nested-loading{
+        width: 100%;
+        .ant-list{
+            width: 100%;
+        }
+        .ant-collapse-items{
+            padding: 0;
+            margin: 0;
+        }
+    }
+    .ant-list-item{
+        border: none;
+        padding: 0;
+        background: #fff;
+        border: 1px solid #696969;
+        :last-child{
+            border-bottom: 1px solid #696969;
+        }
+        .ant-list-empty-text{
+            padding: 0;
+        }
+        .ant-collapse{
+            width: 100%;
+        }
+        .ant-collapse-item{
+            width: 100%;
+            border: none;
+        }
+        .ant-collapse-header{
+            border: none;
+            padding: 0;
+        }
+        .ant-collapse-content{
+            border: none;
+            .ant-collapse-content-box{
+                border-radius: 0;
+                padding: 0;
+            }
+        }
+        .ant-list-item{
+                padding-right: 0;
+                padding-left: 0; 
+                background: #ddd;
+                border: 1px solid #696969;
+                vertical-align: middle;
+                .ant-collapse-header{
+                    border-radius: 0;
+                }
+                .ant-collapse-item{
+                    border: none;
+                }
+        }
+    }
+`
+
 const { Option } = Select;
 
 function Counter(){
@@ -71,14 +143,16 @@ function Counter(){
             RUB: 0,
             USD: 0
     });
-    const [difficulty] = useImmer(2);
+    const [difficulty] = useState(10);
+    const [wait, setWait] = useState(0);
+    const [isAdding, setIsAdding] = useState(false);
+    const [queue, setQueue] = useImmer([]);
     const [chain, setChain] = useImmer([{
         index : 0,
         previousHash : '',
         timestamp : new Date(),
         data : [],
         hash : calculateHash(0,'',new Date(),[],0),
-        nonce: 0
     }]);
 
     //methods
@@ -140,22 +214,13 @@ function Counter(){
                     draft.currency = null;
                 });
         } else {
-                let block = {
-                    data: []
-                };
-                block.index = chain[chain.length-1].index + 1;
-                block.previousHash =  chain[chain.length-1].hash;
-                    let now = new Date();
-                block.timestamp = now;
-                block.data.push(transaction);
-                block.nonce = 0;
-                block.hash = calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.nonce);
-                let miner = mineBlock(difficulty, block);
-                block.nonce = miner.nonce;
-                block.hash = miner.hash;
-                setChain(draft => {
-                    draft.push(block);
-                })
+                setQueue(q => {
+                    q.push(transaction);
+                });
+                if (wait !== difficulty&&wait !== 0){
+                    setWait(difficulty);
+                }
+                setIsAdding(true);
         }
     }
 
@@ -179,8 +244,8 @@ function Counter(){
     };
 
     //chaim methods
-    function calculateHash(index, previousHash, timestamp, data, nonce) {
-        return SHA256(index + previousHash + JSON.stringify(timestamp) + JSON.stringify(data) + nonce).toString();
+    function calculateHash(index, previousHash, timestamp, data) {
+        return SHA256(index + previousHash + JSON.stringify(timestamp) + JSON.stringify(data)).toString();
     }
 
     function calculateTxHash(id, name, RUB, RMB, USD, timestamp, complete) {
@@ -194,18 +259,50 @@ function Counter(){
        return false
     }
 
-    function mineBlock(difficulty, block) {
-        let nonce = 0;
-        let hash = block.hash;
-        while (hash.substring(0, difficulty) !== Array(difficulty +1).join("0")) {
-            nonce++;
-            hash = calculateHash(block.index, block.previousHash, block.timestamp, block.data, nonce);
+    useEffect( () => {
+        let timer;
+        if (wait !== 0 && isAdding) {
+            timer = setInterval(() => {
+                setWait(n => {
+                    if (n === 1) {
+                                let now = new Date();
+                                let tempBlock = {
+                                    timestamp: now,
+                                    data: [],
+                                    index: chain[chain.length - 1].index + 1,
+                                    previousHash: chain[chain.length - 1].hash
+                                }
+                                clearInterval(timer);
+                                if (queue.length <= 5){
+                                    queue.forEach(item => {
+                                        tempBlock.data.push(item);
+                                    })
+                                    setQueue( draft => {
+                                        draft.splice(0,queue.length)
+                                    })
+                                    setIsAdding(false);
+                                }else{
+                                    queue.slice(0, 5).forEach(item => {
+                                        tempBlock.data.push(item);
+                                    });
+                                    setQueue( draft => {
+                                        draft.splice(0,5)
+                                    })
+                                    setWait(difficulty);
+                                }
+                                tempBlock.hash = calculateHash(tempBlock.index, tempBlock.previousHash, tempBlock.timestamp, tempBlock.data);
+                                setChain(draft => {
+                                    draft.push(tempBlock);
+                                });
+                    }
+                    return n - 1
+                });
+            }, 1000);
+            return () => {
+                clearInterval(timer);
+            }
         }
-        return {
-            hash: hash,
-            nonce: nonce
-        }
-    }
+    },[isAdding,queue.length,chain,difficulty,queue,setChain,setQueue,wait])
 
     //http
     useEffect(() => {
@@ -245,13 +342,55 @@ function Counter(){
                     <Text>{ (1/rate.USD).toFixed(3) }￥/$</Text>
                 </div>
             </Paragraph>
+            <Paragraph>Add a New Block Need to Wait：{ wait }s</Paragraph>
+            <Title>Queue：</Title>
+            <MyList
+                bordered
+                dataSource={ queue }
+                renderItem={ item => (
+                    <List.Item
+                        key={ item.txhash }
+                    >
+                        <ListParagraph>
+                            <div>
+                                <myContext.Provider value={{
+                                    data: item,
+                                    judge: item.complete,
+                                    chain: chain,
+                                    setChain: setChain,
+                                    difficulty: difficulty,
+                                    setWait: setWait,
+                                    queue: queue,
+                                    setQueue: setQueue,
+                                    setIsAdding: setIsAdding,
+                                }}>
+                                    <Judgebox/>
+                                </myContext.Provider>
+                            </div>
+                            <div>
+                                <Text>{ item.RUB }₽</Text>
+                                <Text>{ item.RMB }￥</Text>
+                                <Text>{ item.USD }$</Text>
+                                <Text></Text>
+                                <Text></Text>
+                                <Text>txHash:{ item.txhash }</Text>
+                            </div>
+                        </ListParagraph>
+                    </List.Item>
+                )}
+            />
             <myContext.Provider value={{
                 listTitle: 'Plan：',
                 sumTitle: 'Cost：',
                 data: chain,
                 judge: false,
                 setData: setChain,
-                difficulty: difficulty
+                difficulty: difficulty,
+                wait: wait,
+                setWait: setWait,
+                queue: queue,
+                setQueue: setQueue,
+                setIsAdding: setIsAdding,
             }}>
                 <SumList></SumList>
             </myContext.Provider>
@@ -262,7 +401,12 @@ function Counter(){
                 data: chain,
                 judge: true,
                 setData: setChain,
-                difficulty: difficulty
+                difficulty: difficulty,
+                wait: wait,
+                setWait: setWait,
+                queue: queue,
+                setQueue: setQueue,
+                setIsAdding: setIsAdding,
             }}>
                 <SumList></SumList>
             </myContext.Provider>
