@@ -145,7 +145,6 @@ function Counter(){
     });
     const [difficulty] = useState(10);
     const [wait, setWait] = useState(0);
-    const [isAdding, setIsAdding] = useState(false);
     const [queue, setQueue] = useImmer([]);
     const [chain, setChain] = useImmer([{
         index : 0,
@@ -202,26 +201,15 @@ function Counter(){
                     transaction.RUB = 0;
                     transaction.USD = 0;
         }
-        transaction.txhash = calculateTxHash(transaction.id, transaction.name, transaction.RUB, transaction.RMB, transaction.USD, transaction.timestamp, transaction.complete)
-        if (!isLastestBlockFull()) {
-                setChain( draft => {
-                    draft[chain.length-1].data.push(transaction);
-                    draft[chain.length-1].hash = calculateHash(draft[chain.length-1].index, draft[chain.length-1].previousHash, draft[chain.length-1].timestamp, draft[chain.length-1].data);
-                });
-                setForm( draft => {
-                    draft.name = '';
-                    draft.price = '';
-                    draft.currency = null;
-                });
-        } else {
-                setQueue(q => {
-                    q.push(transaction);
-                });
-                if (wait !== difficulty&&wait !== 0){
-                    setWait(difficulty);
-                }
-                setIsAdding(true);
-        }
+        transaction.txhash = calculateTxHash(transaction.id, transaction.name, transaction.RUB, transaction.RMB, transaction.USD, transaction.timestamp, transaction.complete);
+        setForm( draft => {
+            draft.name = '';
+            draft.price = '';
+            draft.currency = null;
+        });
+        setQueue(q => {
+            q.push(transaction);
+        });
     }
 
     function getChain() {
@@ -252,16 +240,9 @@ function Counter(){
         return SHA256(id + name + RUB + RMB + USD + complete + JSON.stringify(timestamp)).toString();
     }
 
-    function isLastestBlockFull() {
-       if (chain[chain.length - 1].data.length >= 5) {
-           return true
-       }
-       return false
-    }
-
     useEffect( () => {
         let timer;
-        if (wait !== 0 && isAdding) {
+        if (wait !== 0) {
             timer = setInterval(() => {
                 setWait(n => {
                     if (n === 1) {
@@ -272,7 +253,6 @@ function Counter(){
                                     index: chain[chain.length - 1].index + 1,
                                     previousHash: chain[chain.length - 1].hash
                                 }
-                                clearInterval(timer);
                                 if (queue.length <= 5){
                                     queue.forEach(item => {
                                         tempBlock.data.push(item);
@@ -280,7 +260,6 @@ function Counter(){
                                     setQueue( draft => {
                                         draft.splice(0,queue.length)
                                     })
-                                    setIsAdding(false);
                                 }else{
                                     queue.slice(0, 5).forEach(item => {
                                         tempBlock.data.push(item);
@@ -288,12 +267,12 @@ function Counter(){
                                     setQueue( draft => {
                                         draft.splice(0,5)
                                     })
-                                    setWait(difficulty);
                                 }
                                 tempBlock.hash = calculateHash(tempBlock.index, tempBlock.previousHash, tempBlock.timestamp, tempBlock.data);
                                 setChain(draft => {
                                     draft.push(tempBlock);
                                 });
+                                return difficulty
                     }
                     return n - 1
                 });
@@ -302,7 +281,7 @@ function Counter(){
                 clearInterval(timer);
             }
         }
-    },[isAdding,queue.length,chain,difficulty,queue,setChain,setQueue,wait])
+    },[queue.length,chain,difficulty,queue,setChain,setQueue,wait])
 
     //http
     useEffect(() => {
@@ -319,6 +298,10 @@ function Counter(){
         };
         fetchData();
     }, [setRate]);
+
+    useEffect( () => {
+        setWait(difficulty);
+    },[setWait,difficulty])
 
     //render
     return (
@@ -358,11 +341,9 @@ function Counter(){
                                     judge: item.complete,
                                     chain: chain,
                                     setChain: setChain,
-                                    difficulty: difficulty,
                                     setWait: setWait,
                                     queue: queue,
                                     setQueue: setQueue,
-                                    setIsAdding: setIsAdding,
                                 }}>
                                     <Judgebox/>
                                 </myContext.Provider>
@@ -385,12 +366,10 @@ function Counter(){
                 data: chain,
                 judge: false,
                 setData: setChain,
-                difficulty: difficulty,
                 wait: wait,
                 setWait: setWait,
                 queue: queue,
                 setQueue: setQueue,
-                setIsAdding: setIsAdding,
             }}>
                 <SumList></SumList>
             </myContext.Provider>
@@ -401,12 +380,10 @@ function Counter(){
                 data: chain,
                 judge: true,
                 setData: setChain,
-                difficulty: difficulty,
                 wait: wait,
                 setWait: setWait,
                 queue: queue,
                 setQueue: setQueue,
-                setIsAdding: setIsAdding,
             }}>
                 <SumList></SumList>
             </myContext.Provider>

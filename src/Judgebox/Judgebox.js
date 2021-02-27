@@ -20,7 +20,7 @@ const MyCheckbox = styled(Checkbox)`
 
 function Judgebox(){
 
-    const { data,judge,chain,setChain,difficulty,wait,setWait,queue,setQueue,setIsAdding } = useContext(myContext);
+    const { data,judge,chain,queue,setQueue } = useContext(myContext);
 
     //Judgebox onChange
     function onChange(e) {
@@ -41,36 +41,15 @@ function Judgebox(){
             timestamp: now,
             txhash: calculateTxHash(currentTx[0].id, currentTx[0].name, currentTx[0].RUB, currentTx[0].RMB, currentTx[0].USD, now, !currentTx[0].complete)
         }
-        if ( !isLastestBlockFull() ) {
-            setChain( draft => {
-                draft[chain.length-1].data.push(newTx);
-                draft[chain.length-1].hash = calculateHash(draft[chain.length-1].index, draft[chain.length-1].previousHash, draft[chain.length-1].timestamp, draft[chain.length-1].data);
-            });
-        } else {
-            setQueue(q => {
-                q.push(newTx);
-            });
-            if (wait === 0){
-                setWait(difficulty);
-            }
-            setIsAdding(true);
-        }
+        setQueue(q => {
+            q.push(newTx);
+        });
     }
 
     //chaim methods
-    function calculateHash(index, previousHash, timestamp, data, nonce) {
-        return SHA256(index + previousHash + JSON.stringify(timestamp) + JSON.stringify(data) + nonce).toString();
-    }
 
     function calculateTxHash(id, name, RUB, RMB, USD, timestamp, complete) {
         return SHA256(id + name + RUB + RMB + USD + complete + JSON.stringify(timestamp)).toString();
-    }
-
-    function isLastestBlockFull() {
-        if (chain[chain.length - 1].data.length >= 5) {
-            return true
-        }
-        return false
     }
 
     if (!judge) {

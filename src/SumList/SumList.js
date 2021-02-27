@@ -104,7 +104,7 @@ const { Panel } = Collapse;
 
 function SumList() {
 
-    const { data,listTitle,sumTitle,judge,setData,difficulty,wait,setWait,queue,setQueue,setIsAdding } = useContext(myContext);
+    const { data,listTitle,sumTitle,judge,setData,wait,setWait,queue,setQueue } = useContext(myContext);
 
     //collapse
     function callback(key) {
@@ -161,13 +161,8 @@ function SumList() {
                                                             data: item,
                                                             judge: judge,
                                                             chain: data,
-                                                            setChain: setData,
-                                                            difficulty: difficulty,
-                                                            wait: wait,
-                                                            setWait: setWait,
                                                             queue: queue,
                                                             setQueue: setQueue,
-                                                            setIsAdding: setIsAdding,
                                                         }}>
                                                             <Judgebox/>
                                                         </myContext.Provider>
@@ -214,13 +209,8 @@ function SumList() {
                                                                         data: itemPanel,
                                                                         judge: itemPanel.complete,
                                                                         chain: data,
-                                                                        setChain: setData,
-                                                                        difficulty: difficulty,
-                                                                        wait: wait,
-                                                                        setWait: setWait,
                                                                         queue: queue,
                                                                         setQueue: setQueue,
-                                                                        setIsAdding: setIsAdding,
                                                                     }}>
                                                                         <Judgebox></Judgebox>
                                                                     </myContext.Provider>
